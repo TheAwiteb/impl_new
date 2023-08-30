@@ -10,7 +10,7 @@ mod fields;
 
 fn impl_new(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
     let struct_name = &ast.ident;
-    let new_function_doc = format!("Creates a new instance of [`{}`].", struct_name);
+    let new_function_doc = format!(" Creates a new instance of [`{}`].", struct_name);
     let fields = fields::Fields::parse(ast);
     let names = fields.names;
     let types = fields.types;
