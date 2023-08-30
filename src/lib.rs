@@ -3,12 +3,21 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+use proc_macro_error::abort;
 use quote::quote;
 
 mod attrs;
 mod fields;
+mod utils;
 
 fn impl_new(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
+    if let Some(sp) = utils::is_path_exist("impl_new", &ast.attrs) {
+        abort!(
+            sp,
+            "The `impl_new` attribute is not supported on the struct itself.";
+            help = "The `impl_new` attribute is only supported on the fields."
+        )
+    }
     let struct_name = &ast.ident;
     let new_function_doc = format!(" Creates a new instance of [`{}`].", struct_name);
     let fields = fields::Fields::parse(ast);
