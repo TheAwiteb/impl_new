@@ -2,7 +2,8 @@ use proc_macro2::{Ident, Literal, Span, TokenTree};
 use proc_macro_error::abort;
 use syn::spanned::Spanned;
 
-const SUPPORTED_ATTRIBUTES: &str = "The supported attributes are: `name`";
+const SUPPORTED_META_NAME_VALUE_ATTRIBUTES: &str = "Supported meta name value attributes: `name`";
+const ALL_SUPPORTED_ATTRIBUTES: &str = "Supported attributes: `name = \"...\"`";
 
 /// A struct that holds the attributes of a field.
 #[derive(Clone, Debug)]
@@ -56,15 +57,15 @@ impl Attrs {
                             abort!(
                                 span,
                                 "Empty attribute is not supported. {}",
-                                SUPPORTED_ATTRIBUTES
+                                ALL_SUPPORTED_ATTRIBUTES
                             );
                         }
                         AttrType::MetaWord(ident, span) => {
                             abort!(
                                 span,
-                                "Attribute `{}` is not supported. {}",
+                                "Word attribute `{}` is not supported. {}",
                                 ident,
-                                SUPPORTED_ATTRIBUTES
+                                ALL_SUPPORTED_ATTRIBUTES
                             );
                         }
                         AttrType::MetaNameValueStr(ident, lit, span) => {
@@ -80,12 +81,16 @@ impl Attrs {
                                     span,
                                     "Attribute `{}` is not supported. {}",
                                     ident,
-                                    SUPPORTED_ATTRIBUTES
+                                    SUPPORTED_META_NAME_VALUE_ATTRIBUTES
                                 );
                             }
                         }
                         AttrType::Else(span) => {
-                            abort!(span, "Attribute is not supported. {}", SUPPORTED_ATTRIBUTES);
+                            abort!(
+                                span,
+                                "Attribute is not supported. {}",
+                                ALL_SUPPORTED_ATTRIBUTES
+                            );
                         }
                     }
                 }

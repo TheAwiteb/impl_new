@@ -24,12 +24,13 @@ impl Fields {
                 syn::Fields::Named(ref fields_named) => Fields::from(fields_named),
                 syn::Fields::Unnamed(ref fields_unnamed) => Fields::from(fields_unnamed),
                 syn::Fields::Unit => {
-                    abort!(ast, "Unit structs are not supported for New derive macro");
+                    abort!(
+                        ast,
+                        "Unit structs are not supported for `impl_new::New` derive macro"
+                    );
                 }
             },
-            _ => {
-                abort!(ast, "Only structs are supported for New derive macro");
-            }
+            _ => unreachable!("We already checked if the derive input is a struct."),
         }
     }
 }
@@ -65,7 +66,8 @@ impl From<&syn::FieldsUnnamed> for Fields {
                 abort!(
                     field,
                     "Unnamed fields must have a name attribute.";
-                    help = "Write this after the field: `#[impl_new(name = \"name\")]`",
+                    help = "Write this after the field: `#[impl_new(name = \"name\")]`";
+                    note = "If you don't want to specify a name, use a named field instead."
                 );
             }
         }
