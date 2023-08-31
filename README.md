@@ -89,6 +89,6 @@ fn main() {
 - `#[impl_new(name = "name")]`: Use this attribute to change the name of the argument in the generated `new` function.
 
 ## License
-This project is licensed under the [MIT license](https://mit-license.org/).
+This project is licensed under the [MIT license](https://opensource.org/license/mit/).
 
 
