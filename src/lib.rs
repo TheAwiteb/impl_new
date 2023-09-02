@@ -1,51 +1,16 @@
 #![doc = include_str!("../README.md")]
+#![allow(dead_code)] // TODO: Remove this when the crate is ready.
 
 extern crate proc_macro;
 
+use new_struct::NewStruct;
 use proc_macro::TokenStream;
 use quote::quote;
 
 mod attrs;
 mod fields;
+mod new_struct;
 mod utils;
-
-fn impl_new(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
-    utils::derive_input_checks(ast);
-    let struct_name = &ast.ident;
-    let new_function_doc = format!(" Creates a new instance of [`{}`].", struct_name);
-    let fields = fields::Fields::parse(ast);
-    let names = fields.names;
-    let types = fields.types;
-    let values_names = fields.values;
-
-    if fields.is_unnamed {
-        quote! {
-            impl #struct_name {
-                #[doc = #new_function_doc]
-                pub fn new(
-                    #( #values_names: impl Into<#types> ),*
-                ) -> Self {
-                    Self(
-                        #( #values_names.into() ),*
-                    )
-                }
-            }
-        }
-    } else {
-        quote! {
-            impl #struct_name {
-                #[doc = #new_function_doc]
-                pub fn new(
-                    #( #values_names: impl Into<#types> ),*
-                ) -> Self {
-                    Self {
-                        #( #names: #values_names.into() ),*
-                    }
-                }
-            }
-        }
-    }
-}
 
 /// Derive macro that implements a new function for a struct.
 /// ## Attributes
@@ -125,4 +90,58 @@ pub fn new_derive(input: TokenStream) -> TokenStream {
     let gen = impl_new(&ast);
 
     gen.into()
+}
+
+/// Implements the `new` function for the given struct.
+fn new_function(new_struct: NewStruct) -> proc_macro2::TokenStream {
+    let new_function_doc = format!(" Creates a new [`{}`] instance.", new_struct.ident);
+    let arg_names: Vec<proc_macro2::Ident> =
+        new_struct.fields.iter().map(|field| field.arg_name()).collect();
+    let types: Vec<syn::Type> = new_struct.fields.iter().map(|field| field.ty.clone()).collect();
+    let values: Vec<syn::Expr> = new_struct.fields.iter().map(|field| field.value()).collect();
+
+    if new_struct.is_tuple_struct {
+        quote! {
+            #[doc = #new_function_doc]
+            pub fn new(#(#arg_names: impl Into<#types>),*) -> Self {
+                Self(#(#values.into()),*)
+            }
+        }
+    } else {
+        let names = new_struct.fields.iter().map(|field| field.field_name());
+        quote!(
+            #[doc = #new_function_doc]
+            pub fn new(#(#arg_names: impl Into<#types>),*) -> Self {
+                Self { #(#names: #values.into()),* }
+            }
+        )
+    }
+}
+
+fn impl_new(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
+    utils::derive_input_checks(ast);
+    let struct_fields = match ast.data {
+        syn::Data::Struct(ref data) => data
+            .fields
+            .clone()
+            .into_iter()
+            .map(fields::ImplNewField::parse)
+            .collect::<syn::Result<Vec<fields::ImplNewField>>>(),
+        _ => unreachable!("The `impl_new::New` macro can only be used on structs."),
+    };
+
+    match struct_fields {
+        Ok(fields) => {
+            utils::new_macro_checks(&fields);
+            let new_struct = NewStruct::new(ast, fields);
+            let new_function = new_function(new_struct);
+            let struct_name = &ast.ident;
+            quote!(
+                impl #struct_name {
+                    #new_function
+                }
+            )
+        }
+        Err(err) => err.to_compile_error(),
+    }
 }

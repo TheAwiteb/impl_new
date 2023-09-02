@@ -1,76 +1,80 @@
-use proc_macro2::Ident;
+use crate::{attrs::ImplNewAttr, utils};
+use darling::FromMeta;
+use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
-use syn::Type;
+use syn::spanned::Spanned;
 
-use crate::attrs::Attrs;
-
-/// A field struct, which is a wrapper around a `String` and a `FieldType`.
-#[derive(Clone, Default)]
-pub(crate) struct Fields {
-    /// The names of the fields.
-    pub names: Vec<Ident>,
-    /// The types of the fields.
-    pub types: Vec<Type>,
-    /// The names of the values of the fields.
-    pub values: Vec<Ident>,
-    pub is_unnamed: bool,
+#[derive(Debug, Clone)]
+pub(crate) struct ImplNewField {
+    /// The span of the field.
+    pub(crate) span: Span,
+    /// The name of the field. Will be None if the field is unnamed.
+    pub(crate) ident: Option<syn::Ident>,
+    /// The type of the field.
+    pub(crate) ty: syn::Type,
+    /// `#[impl_new(...)]` attribute.
+    pub(crate) impl_new_attr: Option<ImplNewAttr>,
 }
 
-impl Fields {
-    /// Parse the given derive input into a `Fields` struct.
-    pub(crate) fn parse(ast: &syn::DeriveInput) -> Self {
-        match ast.data {
-            syn::Data::Struct(ref data_struct) => match data_struct.fields {
-                syn::Fields::Named(ref fields_named) => Fields::from(fields_named),
-                syn::Fields::Unnamed(ref fields_unnamed) => Fields::from(fields_unnamed),
-                syn::Fields::Unit => {
-                    abort!(
-                        ast,
-                        "Unit structs are not supported for `impl_new::New` derive macro"
-                    );
+impl ImplNewField {
+    pub(crate) fn parse(field: syn::Field) -> syn::Result<Self> {
+        let span = field.span();
+        let ident = field.ident.clone();
+        let ty = field.ty.clone();
+        let impl_new_attrs = field
+            .attrs
+            .iter()
+            .filter_map(|attr| {
+                if attr.path().is_ident("impl_new") {
+                    if let Ok(meta_list) = attr.meta.require_list() {
+                        Some(meta_list.tokens.clone())
+                    } else {
+                        abort!(attr, "Invalid `impl_new` attribute, expected #[impl_new(...)].");
+                    }
+                } else {
+                    None
                 }
-            },
-            _ => unreachable!("We already checked if the derive input is a struct."),
-        }
-    }
-}
-
-impl From<&syn::FieldsNamed> for Fields {
-    fn from(fields_named: &syn::FieldsNamed) -> Self {
-        let mut fields = Fields::default();
-        for field in fields_named.named.iter() {
-            let attrs = Attrs::parse(&field.attrs);
-            let ident = field.ident.clone().unwrap();
-            fields.names.push(ident.clone());
-            fields
-                .values
-                .push(attrs.name.map(|(name, _)| name).unwrap_or(ident));
-            fields.types.push(field.ty.clone());
-        }
-        fields
-    }
-}
-
-impl From<&syn::FieldsUnnamed> for Fields {
-    fn from(fields_unnamed: &syn::FieldsUnnamed) -> Self {
-        let mut fields = Fields {
-            is_unnamed: true,
-            ..Fields::default()
+            })
+            .map(|attr: TokenStream| {
+                match ImplNewAttr::from_list(&darling::ast::NestedMeta::parse_meta_list(attr)?) {
+                    Ok(opts) => Ok(opts),
+                    Err(err) => {
+                        utils::abort_error(err, ImplNewAttr::supported_options());
+                        unreachable!()
+                    }
+                }
+            })
+            .collect::<syn::Result<Vec<ImplNewAttr>>>()?;
+        let impl_new_attr = if let Some((first, rest)) = impl_new_attrs.split_first() {
+            let mut opts = first.clone();
+            opts.merge(rest);
+            Some(opts)
+        } else {
+            None
         };
-        for field in fields_unnamed.unnamed.iter() {
-            let attrs = Attrs::parse(&field.attrs);
-            if let Some(name) = attrs.name {
-                fields.values.push(name.0);
-                fields.types.push(field.ty.clone());
-            } else {
-                abort!(
-                    field,
-                    "Unnamed fields must have a name attribute.";
-                    help = "Write this after the field: `#[impl_new(name = \"name\")]`";
-                    note = "If you don't want to specify a name, use a named field instead."
-                );
-            }
+        utils::impl_new_checks(&ident, ty.span(), &impl_new_attr);
+        Ok(Self { span, ident, ty, impl_new_attr })
+    }
+}
+
+impl ImplNewField {
+    /// Returns the argument name of the field.
+    pub fn arg_name(&self) -> syn::Ident {
+        if let Some(name) = self.impl_new_attr.as_ref().and_then(|attr| attr.name.as_ref()) {
+            syn::Ident::new(name, name.span())
+        } else {
+            self.ident.clone().expect("This will never happen, the unnamed fields are checked.")
         }
-        fields
+    }
+
+    /// Returns the field name (For named fields only) if the field is unnamed it will panic.
+    pub fn field_name(&self) -> syn::Ident {
+        self.ident.clone().expect("Unnamed fields cannot be accessed.")
+    }
+
+    /// Returns the field value.
+    pub fn value(&self) -> syn::Expr {
+        let arg_name = self.arg_name();
+        syn::parse_quote! { #arg_name }
     }
 }
