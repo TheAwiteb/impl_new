@@ -1,6 +1,6 @@
 [package]
 name = "impl_new"
-description = "A procedural macro to generate a new impl block for you"
+description = "A procedural macro to generate a new function impl block for you"
 authors = ["Awiteb <awiteb@hotmail.com>"]
 license = "MIT"
 repository = "https://github.com/theawiteb/impl_new"
@@ -15,8 +15,8 @@ rust-version = "1.56.1"
 proc-macro = true
 
 [dependencies]
-
 syn = { version = "2.0.29", features = ["derive"] }
 quote = "1.0"
 proc-macro2 = "1.0"
 proc-macro-error = "1.0.4"
+darling = "0.20.3"
