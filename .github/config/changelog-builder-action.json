@@ -1,0 +1,53 @@
+{
+    "categories": [
+        {
+            "title": "## 🚀 Features",
+            "labels": [
+                "🔥 Feature"
+            ]
+        },
+        {
+            "title": "## 🔨 Fixes",
+            "labels": [
+                "🔨 Fix"
+            ]
+        },
+        {
+            "title": "## 🧪 Tests",
+            "labels": [
+                "🧪 Testing"
+            ]
+        },
+        {
+            "title": "## 📝 Documentation",
+            "labels": [
+                "📖 Documentation"
+            ]
+        },
+        {
+            "title": "## 🧹 Maintenance",
+            "labels": [
+                "🧹 Maintenance"
+            ]
+        },
+        {
+            "title": "## 💥 Breaking Change",
+            "labels": [
+                "💥 Breaking Change"
+            ]
+        }
+    ],
+    "sort": {
+        "order": "ASC",
+        "on_property": "mergedAt"
+    },
+    "base_branches": [
+        "master"
+    ],
+    "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>\n<a href='https://github.com/#{{OWNER}}/#{{REPO}}/compare/#{{FROM_TAG}}...#{{TO_TAG}}'>Commits</a>",
+    "pr_template": "- #{{TITLE}} (PR [#{{NUMBER}}](#{{URL}})) by [#{{AUTHOR}}](https://github.com/#{{AUTHOR}})",
+    "empty_template": "- No pull requests, check <a href='https://github.com/#{{OWNER}}/#{{REPO}}/compare/#{{FROM_TAG}}...#{{TO_TAG}}'>Commits</a>",
+    "max_tags_to_fetch": 200,
+    "max_pull_requests": 200,
+    "max_back_track_time_days": 365
+}

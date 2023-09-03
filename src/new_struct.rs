@@ -15,6 +15,11 @@ impl NewStruct {
         let ident = ast.ident.clone();
         let is_tuple_struct = utils::is_tuple_struct(ast);
         let span = ast.span();
-        Self { ident, is_tuple_struct, fields, span }
+        Self {
+            ident,
+            is_tuple_struct,
+            fields,
+            span,
+        }
     }
 }

@@ -5,7 +5,10 @@ A procedural macro to generate a new function implementation for your struct.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/license/mit/)
 [![Crates.io](https://img.shields.io/crates/v/impl_new.svg)](https://crates.io/crates/impl_new)
+
 [![Docs.rs](https://docs.rs/impl_new/badge.svg)](https://docs.rs/impl_new/latest/impl_new/)
+[![CI](https://github.com/TheAwiteb/impl_new/actions/workflows/ci.yml/badge.svg)](https://github.com/TheAwiteb/impl_new/actions/workflows/ci.yml)
+[![CD](https://github.com/TheAwiteb/impl_new/actions/workflows/cd.yml/badge.svg)](https://github.com/TheAwiteb/impl_new/actions/workflows/cd.yml)
 
 </div>
 
