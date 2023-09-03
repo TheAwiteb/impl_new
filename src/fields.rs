@@ -29,7 +29,10 @@ impl ImplNewField {
                     if let Ok(meta_list) = attr.meta.require_list() {
                         Some(meta_list.tokens.clone())
                     } else {
-                        abort!(attr, "Invalid `impl_new` attribute, expected #[impl_new(...)].");
+                        abort!(
+                            attr,
+                            "Invalid `impl_new` attribute, expected #[impl_new(...)]."
+                        );
                     }
                 } else {
                     None
@@ -53,23 +56,36 @@ impl ImplNewField {
             None
         };
         utils::impl_new_checks(&ident, ty.span(), &impl_new_attr);
-        Ok(Self { span, ident, ty, impl_new_attr })
+        Ok(Self {
+            span,
+            ident,
+            ty,
+            impl_new_attr,
+        })
     }
 }
 
 impl ImplNewField {
     /// Returns the argument name of the field.
     pub fn arg_name(&self) -> syn::Ident {
-        if let Some(name) = self.impl_new_attr.as_ref().and_then(|attr| attr.name.as_ref()) {
+        if let Some(name) = self
+            .impl_new_attr
+            .as_ref()
+            .and_then(|attr| attr.name.as_ref())
+        {
             syn::Ident::new(name, name.span())
         } else {
-            self.ident.clone().expect("This will never happen, the unnamed fields are checked.")
+            self.ident
+                .clone()
+                .expect("This will never happen, the unnamed fields are checked.")
         }
     }
 
     /// Returns the field name (For named fields only) if the field is unnamed it will panic.
     pub fn field_name(&self) -> syn::Ident {
-        self.ident.clone().expect("Unnamed fields cannot be accessed.")
+        self.ident
+            .clone()
+            .expect("Unnamed fields cannot be accessed.")
     }
 
     /// Returns the field value.

@@ -95,10 +95,21 @@ pub fn new_derive(input: TokenStream) -> TokenStream {
 /// Implements the `new` function for the given struct.
 fn new_function(new_struct: NewStruct) -> proc_macro2::TokenStream {
     let new_function_doc = format!(" Creates a new [`{}`] instance.", new_struct.ident);
-    let arg_names: Vec<proc_macro2::Ident> =
-        new_struct.fields.iter().map(|field| field.arg_name()).collect();
-    let types: Vec<syn::Type> = new_struct.fields.iter().map(|field| field.ty.clone()).collect();
-    let values: Vec<syn::Expr> = new_struct.fields.iter().map(|field| field.value()).collect();
+    let arg_names: Vec<proc_macro2::Ident> = new_struct
+        .fields
+        .iter()
+        .map(|field| field.arg_name())
+        .collect();
+    let types: Vec<syn::Type> = new_struct
+        .fields
+        .iter()
+        .map(|field| field.ty.clone())
+        .collect();
+    let values: Vec<syn::Expr> = new_struct
+        .fields
+        .iter()
+        .map(|field| field.value())
+        .collect();
 
     if new_struct.is_tuple_struct {
         quote! {

@@ -10,7 +10,13 @@ pub(crate) fn is_struct(ast: &syn::DeriveInput) -> bool {
 }
 
 pub(crate) fn is_tuple_struct(ast: &syn::DeriveInput) -> bool {
-    matches!(ast.data, syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Unnamed(_), .. }))
+    matches!(
+        ast.data,
+        syn::Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Unnamed(_),
+            ..
+        })
+    )
 }
 
 /// Checks if the attribute exists, and returns the span of the attribute.
@@ -28,7 +34,10 @@ pub(crate) fn is_path_exist(path: &str, attrs: &[syn::Attribute]) -> Option<Span
 /// Run checks on the derive input. Will abort if the input is invalid.
 pub(crate) fn derive_input_checks(ast: &syn::DeriveInput) {
     if !is_struct(ast) {
-        abort!(ast, "The `impl_new::New` macro can only be used on structs.");
+        abort!(
+            ast,
+            "The `impl_new::New` macro can only be used on structs."
+        );
     } else if let Some(sp) = is_path_exist("impl_new", &ast.attrs) {
         abort!(
             sp,
@@ -47,8 +56,10 @@ pub(crate) fn abort_error(errors: darling::Error, supported_fields: &[&str]) {
             diagnostic =
                 diagnostic.help("The `name` option only accepts string literals.".to_owned());
         } else if error_msg.contains("Unknown") || error_msg.contains("Unexpected") {
-            diagnostic = diagnostic
-                .help(format!("Supported field attributes: {}", supported_fields.join(", ")));
+            diagnostic = diagnostic.help(format!(
+                "Supported field attributes: {}",
+                supported_fields.join(", ")
+            ));
         }
         diagnostic.abort();
     }
@@ -73,7 +84,10 @@ pub(crate) fn impl_new_checks(
             help = "Add #[impl_new(name = \"field_name\")] before the type."
         )
     }
-    if let Some(ImplNewAttr { name: Some(name), .. }) = impl_new_attr {
+    if let Some(ImplNewAttr {
+        name: Some(name), ..
+    }) = impl_new_attr
+    {
         if name.is_empty() {
             abort!(
                 name.span(),
@@ -99,7 +113,10 @@ pub(crate) fn impl_new_checks(
 pub(crate) fn new_macro_checks(fields: &[ImplNewField]) {
     let mut names: Vec<&str> = Vec::new();
     for field in fields {
-        if let Some(ImplNewAttr { name: Some(name), .. }) = &field.impl_new_attr {
+        if let Some(ImplNewAttr {
+            name: Some(name), ..
+        }) = &field.impl_new_attr
+        {
             if names.iter().any(|n| n == name.as_ref()) {
                 abort!(
                     name.span(),
