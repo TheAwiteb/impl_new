@@ -67,17 +67,21 @@ impl ImplNewField {
 
 impl ImplNewField {
     /// Returns the argument name of the field.
-    pub fn arg_name(&self) -> syn::Ident {
-        if let Some(name) = self
+    pub fn arg_name(&self) -> Option<syn::Ident> {
+        if matches!(self.impl_new_attr, Some(ImplNewAttr { default, .. }) if default.is_present()) {
+            None
+        } else if let Some(name) = self
             .impl_new_attr
             .as_ref()
             .and_then(|attr| attr.name.as_ref())
         {
-            syn::Ident::new(name, name.span())
+            Some(syn::Ident::new(name, name.span()))
         } else {
-            self.ident
-                .clone()
-                .expect("This will never happen, the unnamed fields are checked.")
+            Some(
+                self.ident
+                    .clone()
+                    .expect("This will never happen, the unnamed fields are checked."),
+            )
         }
     }
 
@@ -90,7 +94,12 @@ impl ImplNewField {
 
     /// Returns the field value.
     pub fn value(&self) -> syn::Expr {
-        let arg_name = self.arg_name();
-        syn::parse_quote! { #arg_name }
+        if matches!(self.impl_new_attr, Some(ImplNewAttr { default, .. }) if default.is_present()) {
+            let ty = &self.ty;
+            syn::parse_quote! { #ty::default() }
+        } else {
+            let arg_name = self.arg_name();
+            syn::parse_quote! { #arg_name.into() }
+        }
     }
 }
