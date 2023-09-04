@@ -12,23 +12,25 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 ### Added
 <!-- This section is for new features and enhancements to existing features. -->
-<!-- Format: `- {issue title} ([{issue number}]({issue link}))` -->
+<!-- Format: `- {The feature or enhancement title}. ([#{PR number}]({PR link}))` -->
+
+- Add `default` flag option to the `impl_new` attribute that remove the field from the `new` function arguments and use the default value of the field type instead. ([#4](https://github.com/theawiteb/impl_new/pull/4))
 
 ### Changed
 <!-- This section is for changes in existing functionality. -->
-<!-- Format: `- {issue title} ([{issue number}]({issue link}))` -->
+<!-- Format: `- {The change title}. ([#{PR number}]({PR link}))` -->
 
 ### Deprecated
 <!-- This section is for once-stable features removed in upcoming releases. -->
-<!-- Format: `- {issue title} ([{issue number}]({issue link}))` -->
+<!-- Format: `- {The deprecation title}. ([#{#PR number}]({PR link}))` -->
 
 ### Removed
 <!-- This section is for deprecated features removed in this release. -->
-<!-- Format: `- {issue title} ([{issue number}]({issue link}))` -->
+<!-- Format: `- {The removal title}. ([#{PR number}]({PR link}))` -->
 
-### Fixed
+<!-- ### Fixed -->
 <!-- This section is for any bug fixes. -->
-<!-- Format: `- {issue title} ([{issue number}]({issue link}))` -->
+<!-- Format: `- {The bug which was fixed title}. ([#{PR number}]({PR link}))` -->
 
 
 ## [0.1.0] - 2021-05-01
