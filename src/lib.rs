@@ -15,6 +15,7 @@ mod utils;
 /// Derive macro that implements a new function for a struct.
 /// ## Attributes
 /// - `#[impl_new(name = "name")]`: Use this attribute to change the name of the argument in the generated `new` function.
+/// - `#[impl_new(default)]`: Use this attribute to remove the field from the generated `new` function and use the default value instead.
 ///
 //// ## Example
 /// ### For Named Fields
@@ -98,7 +99,7 @@ fn new_function(new_struct: NewStruct) -> proc_macro2::TokenStream {
     let arg_names: Vec<proc_macro2::Ident> = new_struct
         .fields
         .iter()
-        .map(|field| field.arg_name())
+        .filter_map(|field| field.arg_name())
         .collect();
     let types: Vec<syn::Type> = new_struct
         .fields
@@ -115,7 +116,7 @@ fn new_function(new_struct: NewStruct) -> proc_macro2::TokenStream {
         quote! {
             #[doc = #new_function_doc]
             pub fn new(#(#arg_names: impl Into<#types>),*) -> Self {
-                Self(#(#values.into()),*)
+                Self(#(#values),*)
             }
         }
     } else {
@@ -123,7 +124,7 @@ fn new_function(new_struct: NewStruct) -> proc_macro2::TokenStream {
         quote!(
             #[doc = #new_function_doc]
             pub fn new(#(#arg_names: impl Into<#types>),*) -> Self {
-                Self { #(#names: #values.into()),* }
+                Self { #(#names: #values),* }
             }
         )
     }

@@ -62,7 +62,7 @@ fn into_of_into() {
 }
 
 #[test]
-fn with_attributes() {
+fn with_name_option() {
     #[derive(impl_new::New)]
     struct Test {
         #[impl_new(name = "user_name")]
@@ -74,4 +74,19 @@ fn with_attributes() {
     let test = Test::new("Awiteb", 20usize);
     assert_eq!(test.name, "Awiteb".to_owned());
     assert_eq!(test.age, 20);
+}
+
+#[test]
+fn with_default_option() {
+    #[derive(impl_new::New)]
+    struct Test {
+        #[impl_new(default)]
+        name: String,
+        #[impl_new(default)]
+        age: usize,
+    }
+
+    let test = Test::new();
+    assert_eq!(test.name, String::default());
+    assert_eq!(test.age, usize::default());
 }

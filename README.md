@@ -75,7 +75,10 @@ fn main() {
 
 ## 🛹 Attributes
 ### `#[impl_new(name = "name")]`
-This attribute specifies the name of the argument in the `new` function. This attribute is required for unnamed fields.
+The `name` option specifies the name of the argument in the `new` function.
+
+> Note: This attribute is required for unnamed fields.
+
 #### Example
 ```rust
 #[derive(impl_new::New)]
@@ -115,7 +118,47 @@ fn main() {
     assert_eq!(user.name, "Hello".to_string());
     assert_eq!(user.age, 42);
 }
+```
 
+### `#[impl_new(default)]`
+The `default` option will remove the field from the `new` function arguments and use the default value of the field type instead.
+
+> Note: This option is conflict with the `name` option, because the field will be removed from the `new` function arguments.
+
+#### Example
+```rust
+#[derive(impl_new::New, Default, Debug, PartialEq)]
+struct User {
+    name: String,
+    #[impl_new(default)]
+    is_admin: bool,
+}
+
+// The generated code will look like this:
+// impl User {
+//     pub fn new(name: impl Into<String>) -> Self {
+//         Self { name: name.into(), is_admin: bool::default() }
+//     }
+// }
+
+#[derive(impl_new::New)]
+struct Foo(#[impl_new(name = "somthing")] String, #[impl_new(default)] User);
+
+// The generated code will look like this:
+// impl Foo {
+//     pub fn new(somthing: impl Into<String>) -> Self {
+//         Self(somthing.into(), User::default())
+//     }
+// }
+
+fn main() {
+    let user = User::new("Hello"); // Will use `Into::into` to convert the arguments to the fields types.
+    let some_foo = Foo::new("Hello"); // Will use `Into::into` to convert the arguments to the fields types.
+    assert_eq!(user.name, "Hello".to_string());
+    assert_eq!(user.is_admin, false);
+    assert_eq!(some_foo.0, "Hello".to_string());
+    assert_eq!(some_foo.1, User::default());
+}
 ```
 
 ## 🤗 Contributing

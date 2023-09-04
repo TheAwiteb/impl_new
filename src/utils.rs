@@ -68,16 +68,22 @@ pub(crate) fn abort_error(errors: darling::Error, supported_fields: &[&str]) {
 /// Run checks on the `impl_new` attribute. Will abort if the attribute is invalid.
 ///
 /// ## Checks
+/// ### `name` option
 /// - Checks if the `name` option are set for unnamed fields.
 /// - Checks if the `name` option value is not empty.
 /// - Checks if the `name` option value are a valid identifier.
+/// ### `default` option
+/// - Checks that the `default` option is not set with the `name` option.
 pub(crate) fn impl_new_checks(
     ident: &Option<syn::Ident>,
     ty_span: Span,
     impl_new_attr: &Option<ImplNewAttr>,
 ) {
     let is_named = ident.is_some();
-    if !is_named && matches!(impl_new_attr, None | Some(ImplNewAttr { name: None, .. })) {
+    if !is_named
+        && (impl_new_attr.is_none()
+            || matches!(impl_new_attr, Some(ImplNewAttr { name: None, default, .. }) if !default.is_present()))
+    {
         abort!(
             ty_span,
             "Unnamed fields must have the `name` option set.";
@@ -85,9 +91,20 @@ pub(crate) fn impl_new_checks(
         )
     }
     if let Some(ImplNewAttr {
-        name: Some(name), ..
+        name: Some(name),
+        default,
+        ..
     }) = impl_new_attr
     {
+        if default.is_present() {
+            abort!(
+                name.span(),
+                "The `default` option cannot be used with the `name` option.";
+                help = "Remove the `name` option.";
+                note = "The `default` option will remove the field from the generated `new` function, \
+                        so the `name` option is not needed."
+            )
+        }
         if name.is_empty() {
             abort!(
                 name.span(),
