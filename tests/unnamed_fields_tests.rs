@@ -58,3 +58,18 @@ fn into_of_into_tuble_struct() {
     assert_eq!(test.0, "Awiteb".to_owned());
     assert_eq!(test.1 .0, "Hello World".to_owned());
 }
+
+#[test]
+fn with_default_option() {
+    #[derive(impl_new::New)]
+    struct Test(
+        #[impl_new(name = "name")] String,
+        #[impl_new(default)] usize,
+        #[impl_new(default)] bool,
+    );
+
+    let test = Test::new("Awiteb");
+    assert_eq!(test.0, "Awiteb".to_owned());
+    assert_eq!(test.1, 0);
+    assert!(!test.2); // false
+}
