@@ -16,6 +16,7 @@ mod utils;
 /// ## Attributes
 /// - `#[impl_new(name = "name")]`: Use this attribute to change the name of the argument in the generated `new` function.
 /// - `#[impl_new(default)]`: Use this attribute to remove the field from the generated `new` function and use the default value instead.
+/// - `#[impl_new(value = || <VALUE>)]`: Use this attribute to remove the field from the generated `new` function and use the given value instead.
 ///
 //// ## Example
 /// ### For Named Fields
@@ -149,6 +150,8 @@ fn impl_new(ast: &syn::DeriveInput) -> proc_macro2::TokenStream {
             let new_function = new_function(new_struct);
             let struct_name = &ast.ident;
             quote!(
+                #[allow(clippy::redundant_closure)]
+                #[allow(clippy::redundant_closure_call)]
                 impl #struct_name {
                     #new_function
                 }

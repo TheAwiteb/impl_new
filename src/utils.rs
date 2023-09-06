@@ -74,25 +74,28 @@ pub(crate) fn abort_error(errors: darling::Error, supported_fields: &[&str]) {
 /// - Checks if the `name` option value are a valid identifier.
 /// ### `default` option
 /// - Checks that the `default` option is not set with the `name` option.
+/// ### `value` option
+/// - Checks that the `value` option is not set with the `name` and `default` option.
+/// - Checks that the `value` option is a closure expression.
 pub(crate) fn impl_new_checks(
     ident: &Option<syn::Ident>,
-    ty_span: Span,
+    field_type: &syn::Type,
     impl_new_attr: &Option<ImplNewAttr>,
 ) {
     let is_named = ident.is_some();
     if !is_named
         && (impl_new_attr.is_none()
-            || matches!(impl_new_attr, Some(ImplNewAttr { name: None, default, .. }) if !default.is_present()))
+            || matches!(impl_new_attr, Some(ImplNewAttr { name: None, default, value, .. }) if !default.is_present() && value.is_none()))
     {
         abort!(
-            ty_span,
-            "Unnamed fields must have the `name` option set.";
-            help = "Add #[impl_new(name = \"field_name\")] before the type."
+            field_type,
+            "Unnamed fields must have the `name`, `default` or `value` option set."
         )
     }
     if let Some(ImplNewAttr {
         name: Some(name),
         default,
+        value,
         ..
     }) = impl_new_attr
     {
@@ -102,6 +105,15 @@ pub(crate) fn impl_new_checks(
                 "The `default` option cannot be used with the `name` option.";
                 help = "Remove the `name` option.";
                 note = "The `default` option will remove the field from the generated `new` function, \
+                        so the `name` option is not needed."
+            )
+        }
+        if value.is_some() {
+            abort!(
+                name.span(),
+                "The `value` option cannot be used with the `name` option.";
+                help = "Remove the `name` option.";
+                note = "The `value` option will remove the field from the generated `new` function, \
                         so the `name` option is not needed."
             )
         }
@@ -118,6 +130,20 @@ pub(crate) fn impl_new_checks(
                 name.as_ref();
                 help = "The `name` option value must be a valid identifier.";
                 note = "The `name` option is used to create the argument name of the field."
+            )
+        }
+    } else if let Some(ImplNewAttr { default, value, .. }) = impl_new_attr {
+        if default.is_present() && value.is_some() {
+            abort!(
+                value.as_ref().unwrap().span(),
+                "The `default` and `value` options cannot be used together.";
+                help = "Remove the `default` or `value` option."
+            )
+        }
+        if value.is_some() && !matches!(value.as_deref(), Some(syn::Expr::Closure(_))) {
+            abort!(
+                value.as_ref().unwrap().span(),
+                "The `value` option must be a closure expression."
             )
         }
     }

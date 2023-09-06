@@ -3,18 +3,20 @@ use darling::{
     FromMeta,
 };
 use proc_macro_error::abort;
+use syn::ExprClosure;
 
 #[derive(Debug, Clone, FromMeta)]
 #[non_exhaustive]
 pub(crate) struct ImplNewAttr {
     pub name: Option<SpannedValue<String>>,
     pub default: Flag,
+    pub value: Option<SpannedValue<syn::Expr>>,
 }
 
 impl ImplNewAttr {
     /// Returns the supported options for the `impl_new` attribute.
     pub(crate) const fn supported_options() -> &'static [&'static str] {
-        &["`name = \"field_name\"`", "`default`"]
+        &["`name = \"field_name\"`", "value = || <VALUE>", "`default`"]
     }
 
     /// Merges the attributes. Will abort if there a duplicates.
@@ -61,5 +63,12 @@ impl ImplNewAttr {
     }
         check_dup!(name);
         merge_opts!(name);
+    }
+}
+
+fn check_is_closure(expr: syn::Expr) -> ExprClosure {
+    match expr {
+        syn::Expr::Closure(closure) => closure,
+        _ => abort!(expr, "Expected a closure."),
     }
 }
