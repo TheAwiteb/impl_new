@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 <!-- Format: `- {The feature or enhancement title}. ([#{PR number}]({PR link}))` -->
 
 - Add `default` flag option to the `impl_new` attribute that remove the field from the `new` function arguments and use the default value of the field type instead. ([#4](https://github.com/theawiteb/impl_new/pull/4))
+- Add `value` option to the `impl_new` attribute that set the field value to the given value. ([#6](https://github.com/theawiteb/impl_new/pull/6))
 
 ### Changed
 <!-- This section is for changes in existing functionality. -->

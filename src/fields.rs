@@ -55,7 +55,7 @@ impl ImplNewField {
         } else {
             None
         };
-        utils::impl_new_checks(&ident, ty.span(), &impl_new_attr);
+        utils::impl_new_checks(&ident, &ty, &impl_new_attr);
         Ok(Self {
             span,
             ident,
@@ -68,7 +68,8 @@ impl ImplNewField {
 impl ImplNewField {
     /// Returns the argument name of the field.
     pub fn arg_name(&self) -> Option<syn::Ident> {
-        if matches!(self.impl_new_attr, Some(ImplNewAttr { default, .. }) if default.is_present()) {
+        if matches!(&self.impl_new_attr, Some(ImplNewAttr { default, value, .. }) if default.is_present() || value.is_some())
+        {
             None
         } else if let Some(name) = self
             .impl_new_attr
@@ -97,6 +98,18 @@ impl ImplNewField {
         if matches!(self.impl_new_attr, Some(ImplNewAttr { default, .. }) if default.is_present()) {
             let ty = &self.ty;
             syn::parse_quote! { #ty::default() }
+        } else if let Some(ImplNewAttr {
+            value: Some(ref value),
+            ..
+        }) = self.impl_new_attr
+        {
+            // get the body span
+            let sp = match value.as_ref() {
+                syn::Expr::Closure(ref expr) => expr.body.span(),
+                _ => unreachable!("The `value` option is checked to be a closure."),
+            };
+            let value = value.as_ref();
+            syn::parse_quote_spanned! { sp => (#value)() }
         } else {
             let arg_name = self.arg_name();
             syn::parse_quote! { #arg_name.into() }

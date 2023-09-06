@@ -161,6 +161,49 @@ fn main() {
 }
 ```
 
+### `#[impl_new(value = || <VALUE>)]`
+The `value` option will set the field value to the given value.
+
+> Note: This option is conflict with the `name` and `default` options, because the field will be removed from the `new` function arguments.
+
+> Note: The value must be a closure that returns the field type.
+
+#### Example
+```rust
+#[derive(impl_new::New)]
+struct User {
+    name: String,
+    #[impl_new(value = || true)]
+    is_active: bool,
+}
+
+// The generated code will look like this: (Not exactly, but you get the idea)
+// impl User {
+//     pub fn new(name: impl Into<String>) -> Self {
+//         Self { name: name.into(), is_active: true }
+//     }
+// }
+
+#[derive(impl_new::New)]
+struct Foo(#[impl_new(name = "name")] String, #[impl_new(value = || true)] bool);
+
+// The generated code will look like this: (Not exactly, but you get the idea)
+// impl Foo {
+//     pub fn new(name: impl Into<String>) -> Self {
+//         Self(name.into(), true)
+//     }
+// }
+
+fn main() {
+    let user = User::new("Bob"); // Will use `Into::into` to convert the arguments to the fields types.
+    let some_foo = Foo::new("Bob"); // Will use `Into::into` to convert the arguments to the fields types.
+    assert_eq!(user.name, "Bob".to_string());
+    assert_eq!(user.is_active, true);
+    assert_eq!(some_foo.0, "Bob".to_string());
+    assert_eq!(some_foo.1, true);
+}
+```
+
 ## 🤗 Contributing
 Contributions are welcome! You can contribute in many ways, for example:
 - Improve the documentation.
