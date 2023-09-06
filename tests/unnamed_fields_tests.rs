@@ -73,3 +73,82 @@ fn with_default_option() {
     assert_eq!(test.1, 0);
     assert!(!test.2); // false
 }
+
+#[test]
+fn with_default_and_value_option() {
+    #[derive(impl_new::New)]
+    struct Test(
+        #[impl_new(name = "name")] String,
+        #[impl_new(default)] usize,
+        #[impl_new(value = || true)] bool,
+    );
+
+    let test = Test::new("Awiteb");
+    assert_eq!(test.0, "Awiteb".to_owned());
+    assert_eq!(test.1, 0);
+    assert!(test.2); // true
+}
+
+#[test]
+fn with_value_option() {
+    #[derive(impl_new::New)]
+    struct Test(
+        #[impl_new(name = "name")] String,
+        #[impl_new(value = || 20)] usize,
+        #[impl_new(value = || true)] bool,
+    );
+
+    let test = Test::new("Awiteb");
+    assert_eq!(test.0, "Awiteb".to_owned());
+    assert_eq!(test.1, 20);
+    assert!(test.2); // true
+}
+
+#[test]
+fn with_function_value_option() {
+    fn get_something() -> String {
+        "Some Value".to_owned()
+    }
+
+    #[derive(impl_new::New)]
+    struct Test(
+        #[impl_new(name = "name")] String,
+        #[impl_new(value = || get_something())] String,
+    );
+
+    let test = Test::new("Awiteb");
+    assert_eq!(test.0, "Awiteb".to_owned());
+    assert_eq!(test.1, "Some Value".to_owned());
+}
+
+#[test]
+fn with_associated_function_value_option() {
+    #[derive(impl_new::New)]
+    struct Test(
+        #[impl_new(name = "name")] String,
+        #[impl_new(value = || String::from("Some Value"))] String,
+    );
+
+    let test = Test::new("Awiteb");
+    assert_eq!(test.0, "Awiteb".to_owned());
+    assert_eq!(test.1, "Some Value".to_owned());
+}
+
+#[test]
+fn with_self_associated_function_value_option() {
+    #[derive(impl_new::New)]
+    struct Test(
+        #[impl_new(name = "name")] String,
+        #[impl_new(value = || Self::get_something())] String,
+    );
+
+    impl Test {
+        fn get_something() -> String {
+            "Some Value".to_owned()
+        }
+    }
+
+    let test = Test::new("Awiteb");
+    assert_eq!(test.0, "Awiteb".to_owned());
+    assert_eq!(test.1, "Some Value".to_owned());
+}
