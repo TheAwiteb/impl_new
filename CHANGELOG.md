@@ -14,9 +14,6 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 <!-- This section is for new features and enhancements to existing features. -->
 <!-- Format: `- {The feature or enhancement title}. ([#{PR number}]({PR link}))` -->
 
-- Add `default` flag option to the `impl_new` attribute that remove the field from the `new` function arguments and use the default value of the field type instead. ([#4](https://github.com/theawiteb/impl_new/pull/4))
-- Add `value` option to the `impl_new` attribute that set the field value to the given value. ([#6](https://github.com/theawiteb/impl_new/pull/6))
-
 ### Changed
 <!-- This section is for changes in existing functionality. -->
 <!-- Format: `- {The change title}. ([#{PR number}]({PR link}))` -->
@@ -34,7 +31,13 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 <!-- Format: `- {The bug which was fixed title}. ([#{PR number}]({PR link}))` -->
 
 
-## [0.1.0] - 2021-05-01
+## [0.2.0] - 2023-09-06
+
+### Added
+- Add `default` flag option to the `impl_new` attribute that remove the field from the `new` function arguments and use the default value of the field type instead. ([#4](https://github.com/theawiteb/impl_new/pull/4))
+- Add `value` option to the `impl_new` attribute that set the field value to the given value. ([#6](https://github.com/theawiteb/impl_new/pull/6))
+
+## [0.1.0] - 2023-08-30
 - Initial release.
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
