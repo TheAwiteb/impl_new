@@ -16,7 +16,7 @@ A procedural macro to generate a new function implementation for your struct.
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-impl_new = "0.1.0"
+impl_new = "0.2.0"
 ```
 Or run this command in your workspace:
 ```bash
