@@ -1,13 +1,13 @@
 [package]
 name = "impl_new"
-description = "A procedural macro to generate a new function impl block for you"
+description = "[deprecated] A procedural macro to generate a new function impl block for you"
 authors = ["Awiteb <awiteb@hotmail.com>"]
 license = "MIT"
 repository = "https://github.com/theawiteb/impl_new"
 documentation = "https://docs.rs/impl_new/latest/impl_new/"
 readme = "README.md"
 keywords = ["proc", "macro", "derive", "impl", "new"]
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 rust-version = "1.56.1"
 

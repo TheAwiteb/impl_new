@@ -1,5 +1,7 @@
 <div align="center">
 
+Deprecation Notice: This crate is deprecated in favor of the [`derive_new`](https://crates.io/crates/derive_new) crate. Please use the [`derive_new`](https://crates.io/crates/derive_new) crate instead of this crate.
+
 # Impl New 🦀
 A procedural macro to generate a new function implementation for your struct.
 
